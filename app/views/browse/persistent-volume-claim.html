@@ -19,6 +19,17 @@
                 <a ng-href="{{pvc | editYamlURL}}" role="button">Edit YAML</a>
               </li>
               <li>
+                <edit-pvc
+                  ng-if="(pvcVersion | canI : 'update') && isExpansionAllowed"
+                  kind="PersistentVolumeClaim"
+                  resource-name="{{pvc.metadata.name}}"
+                  project-name="{{pvc.metadata.namespace}}"
+                  current-capacity="{{pvc.status.capacity['storage']}}"
+                  alerts="alerts"
+                  stay-on-current-page="true">
+                </edit-pvc>
+              </li>
+              <li>
                 <delete-link
                   ng-if="pvcVersion | canI : 'delete'"
                   kind="PersistentVolumeClaim"
