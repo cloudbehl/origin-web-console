@@ -30,9 +30,12 @@ angular.module('openshiftConsole')
       }
     ];
 
+    $scope.storageClassesVersion = APIService.getPreferredVersion('storageclasses');
     $scope.pvcVersion = APIService.getPreferredVersion('persistentvolumeclaims');
     $scope.eventsVersion = APIService.getPreferredVersion('events');
+    $scope.isExpansionAllowed = false;
 
+    var storageClass = $filter('storageClass');
     var watches = [];
 
     var pvcResolved = function(pvc, action) {
@@ -54,6 +57,18 @@ angular.module('openshiftConsole')
       DataService
         .get($scope.pvcVersion, $routeParams.pvc, context, { errorNotification: false })
         .then(function(pvc) {
+          $scope.getStorageClass = storageClass(pvc);
+          DataService.list($scope.storageClassesVersion, {}, function(storageClassData) {
+            var storageClasses = storageClassData.by('metadata.name');
+            if (_.isEmpty(storageClasses) && !storageClasses[$scope.getStorageClass]) {
+              return;
+            }
+            var checkExpansionFlag = storageClasses[$scope.getStorageClass].allowVolumeExpansion;
+            var checkPvcStatus = pvc.status.phase;
+            if(checkExpansionFlag && checkPvcStatus && checkPvcStatus === "Bound" && checkExpansionFlag === true){
+              $scope.isExpansionAllowed = true;
+            }
+          });
           pvcResolved(pvc);
           watches.push(DataService.watchObject($scope.pvcVersion, $routeParams.pvc, context, pvcResolved));
         }, function(e) {

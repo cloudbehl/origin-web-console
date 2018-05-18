@@ -1,0 +1,66 @@
+<div class="modal-resource-action">
+    <!-- Use a form so that the enter key submits when typing a project name to confirm. -->
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" aria-label="Close" ng-click="cancel()">
+      <span class="pficon pficon-close"></span>
+    </button>
+    <h1 class="modal-title">Expand Persistent Volume Claim</h1>
+  </div>
+
+  <div class="modal-body">
+    <h3>Increase the Capacity of claim
+      <strong>{{displayName ? displayName : resourceName}}</strong>.
+      <a href="{{'persistent_volumes' | helpLink}}" target="_blank">
+        <span class="learn-more-inline">Learn More&nbsp;
+          <i class="fa fa-external-link" aria-hidden="true"></i>
+        </span>
+      </a>
+    </h3>
+
+    <p><span>This can be a time-consuming process.</span></p>
+
+    <ng-form name="expandPersistentVolumeClaimForm">
+      <fieldset class="form-inline compute-resource">
+        <label>Capacity</label>
+
+        <div class="resource-size" ng-class="{ 'has-error': expandPersistentVolumeClaimForm.capacity.$invalid && expandPersistentVolumeClaimForm.capacity.$touched}">
+          <div class="resource-amount">
+            <label for="claim-amount" class="sr-only">Amount</label>
+            <input type="number" name="capacity" id="claim-amount" ng-model="claim.capacity" required min="0" pattern="\d+(\.\d+)?" select-on-focus class="form-control" aria-describedby="claim-capacity-help" ng-change="validateLimitRange(expandPersistentVolumeClaimForm)">
+          </div>
+          <div class="resource-unit">
+              <label class="sr-only">Unit</label>
+              <ui-select search-enabled="false" ng-model="claim.unit" input-id="claim-capacity-unit" ng-change="validateLimitRange(expandPersistentVolumeClaimForm)">
+                  <ui-select-match>{{$select.selected.label}}</ui-select-match>
+                  <ui-select-choices repeat="option.value as option in units" group-by="groupUnits">
+                      {{option.label}}
+                  </ui-select-choices>
+              </ui-select>
+          </div>
+        </div>
+
+        <div ng-if="expandPersistentVolumeClaimForm.capacity.$invalid">
+          <div class="has-error" ng-show="expandPersistentVolumeClaimForm.capacity.$error.required">
+            <span class="help-block">Size is required.</span>
+          </div>
+          <div class="has-error" ng-show="expandPersistentVolumeClaimForm.capacity.$error.number">
+            <span class="help-block">Must be a number.</span>
+          </div>
+          <div class="has-error" ng-show="expandPersistentVolumeClaimForm .capacity.$error.min">
+            <span class="help-block">Must be a positive number.</span>
+          </div>
+          <div class="has-error" ng-show="expandPersistentVolumeClaimForm.capacity.$error.checkCurrentCapacity">
+            <span class="help-block">The requested capacity may be less than the current capacity.</span>
+          </div>
+        </div>
+
+      </fieldset>
+
+      <div class="modal-footer">
+          <button class="btn btn-default" type="button" ng-click="cancel();">Cancel</button>
+          <button class="btn btn-primary" type="submit" ng-disabled="expandPersistentVolumeClaimForm.$invalid" ng-click="expand();"> Expand
+          </button>
+      </div>
+    </ng-form>
+  </div>
+</div>
